@@ -8,5 +8,6 @@ A simple program to use data stored from the API
 * Find substituted products
 
 ## Process Description
-  
+
+* Connected to database   
 * Menu : The user selects if he want to substitute a product or to find substituted products
