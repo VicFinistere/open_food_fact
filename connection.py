@@ -11,7 +11,7 @@ class Connection:
                                      port=3306)  # name of the data base
 
         cursor = connection.cursor()
-        print("Vous êtes connecté")
+        # print("Connexion")
         return connection, cursor
 
     @staticmethod
@@ -19,3 +19,4 @@ class Connection:
         # MySQL connection
         cursor.close()
         connection.close()
+        # print("Déconnexion")
