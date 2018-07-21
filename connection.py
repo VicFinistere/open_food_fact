@@ -1,3 +1,8 @@
+""""
+The static class for connection methods
+"""
+# !/usr/bin/python
+# -*- coding: utf-8 -*-
 import pymysql
 
 
@@ -14,9 +19,3 @@ class Connection:
         # print("Connexion")
         return connection, cursor
 
-    @staticmethod
-    def close_database_connection(cursor, connection):
-        # MySQL connection
-        cursor.close()
-        connection.close()
-        # print("Déconnexion")
