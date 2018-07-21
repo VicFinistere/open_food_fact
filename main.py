@@ -107,9 +107,15 @@ def input_next_products(products_count, category_id):
         elif choice == "p" or choice == "P" and product_number >= 10:
             product_number -= 10
         else:
-            print("Try again...")
-            input_next_products(products_count, category_id)
+            print("This is not an option !...")
+            choice = input("Do you want to restart the app ?(Y/N)")
+            if choice == "y" or choice == "Y":
+                make_a_choice()
+            else:
+                input_next_products(products_count, category_id)
+
         get_products(product_number, category_id)
+        ask_user_choice(product_number, category_id)
 
 
 def get_products(product_number, category_id):
@@ -126,6 +132,33 @@ def parse_product(product_number, category_id):
     products = cursor.fetchall()
     print(product_number, ":", products[0][0])
     Connection.close_database_connection(connection, cursor)
+
+
+def ask_user_choice(first_product_in_list, category_id):
+    choice = input("Do you want to substitute one of these products ?(Y/N)")
+    if choice == "y" or choice == "Y":
+        product_number_input = input("Enter the number")
+        product_number = int(product_number_input)
+        if first_product_in_list <= product_number <= first_product_in_list+10:
+            connection, cursor = Connection.connect_to_database()
+            print(f"You choose the number {product_number}")
+            get_product_req = f"SELECT * FROM openfoodfact.products " \
+                              f"WHERE id_category = {category_id} LIMIT {product_number}, 1"
+            cursor.execute(get_product_req)
+            selected_product = cursor.fetchone()
+            print(selected_product)
+            if selected_product[2] == "a":
+                print("This is a very good product ! All we can do is provide you another one with the same grade!")
+            elif selected_product[2] == "b":
+                print("It will be difficult to get a better product but we will see !")
+            elif selected_product[3] == "c":
+                print("The grade is 'c'...We will try to find a better product !!")
+            elif selected_product[3] == "d":
+                print("You are right ! We will find a better substitute in hurry !")
+            else:
+                print(f"The grade is {selected_product[2]}...Seeking better substitute in hurry...")
+        else:
+            print("Out of range !")
 
 
 def seek_substitutes_products(category):
