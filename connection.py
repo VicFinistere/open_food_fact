@@ -15,7 +15,6 @@ class Connection:
                                      db="openfoodfact",
                                      port=3306)  # name of the data base
 
-        cursor = connection.cursor()
         # print("Connexion")
-        return connection, cursor
+        return connection
 

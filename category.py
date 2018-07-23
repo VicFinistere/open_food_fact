@@ -18,7 +18,8 @@ class Category:
         """
 
         # Check if the category is already in table
-        connection, cursor = Connection.connect_to_database()
+        connection = Connection.connect_to_database()
+        cursor = connection.cursor()
         cursor.execute(f"SELECT COUNT(*) AS category_counter FROM openfoodfact.categories "
                        f"WHERE Name = '{category}'")
         cursor.close()
@@ -29,7 +30,8 @@ class Category:
         # If the category is not already in database table
         if check_category[0] == 0:
             # Insert in table
-            connection, cursor = Connection.connect_to_database()
+            connection = Connection.connect_to_database()
+            cursor = connection.cursor()
             cursor.execute(f"INSERT INTO openfoodfact.categories(name) VALUES ('{category}')")
 
             # Commit

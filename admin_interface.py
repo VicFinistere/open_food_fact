@@ -6,40 +6,49 @@ A program to call database where openfoodfact.table contains multiple informatio
 from connection import Connection
 import requests
 from product import Product
+from client_interface import make_a_choice as client_interface
+import warnings
 
 
-def feed_database(url="https://fr.openfoodfacts.org/"):
+def admin_entry(url="https://fr.openfoodfacts.org/"):
     """
-    Action user can perform
+    Administrator menu
+    :param: url : Open Food Fact URL
     """
+    print("\n")
+    print("Vous êtes dans l'interface administrateur !")
+    print("\t * 1 : Choisir une catégorie de produits à insérer ou mettre à jour dans la base de données")
+    print("\t * 2 : Aller dans l'interface utilisateur ")
+    print("\n")
 
-    choice = input("1 = Alimenter la base de données")
+    choice = input("Inscrire votre choix\t")
     if choice == "1":
         select_category(url)
-    else:
-        print("Veuillez réessayer...")
-        feed_database(url)
+    elif choice == "2":
+        client_interface("start")
 
 
 def select_category(url):
     """
     Find a substitute
     """
-    print("Dans quelle catégorie voulez-vous ajouter des données ?")
-    print("1 = sodas à l'orange,"
-          "2 = nems,"
-          "3 = tartelettes,"
-          "4 = sandwichs au fromage,"
-          "5 = pizzas au fromage,"
-          "6 = frites,"
-          "7 = steaks hachés surgelés,"
-          "8 = tartes sucrées,"
-          "9 = pates-a-tartiner-aux-noisettes-et-au-cacao")
-
+    print("\n")
+    print("A présent dans quelle catégorie voulez-vous ajouter des données ?")
+    print("\n")
+    print("\t * 1 : sodas à l'orange")
+    print("\t * 2 : nems")
+    print("\t * 3 : tartelettes")
+    print("\t * 4 : sandwichs au fromage")
+    print("\t * 5 = pizzas au fromage")
+    print("\t * 6 = frites")
+    print("\t * 7 = steack hachés surgelés")
+    print("\t * 8 = tartes sucrées")
+    print("\t * 9 = pâtes à tartiner (noisettes/cacao)")
+    short_url = url
     url_filter = "category"
     parameter = ""
-
-    input_category = input("Enter un numéro de catégorie")
+    print("\n")
+    input_category = input("Entrez un numéro de catégorie s'il vous plaît !\t")
     try:
         category = int(input_category)
         if category == 1:
@@ -70,24 +79,25 @@ def select_category(url):
             parameter = "pates-a-tartiner-aux-noisettes"
 
         if 0 < category < 10:
-            product_count = count_product(url, url_filter, parameter)
-            get_products(url, url_filter, parameter, product_count)
+            url = [short_url, url_filter, parameter]
+            product_count = count_product(url)
+            get_products(url, product_count)
         else:
             select_category(url)
     except ValueError:
         select_category(url)
 
 
-def count_product(url, url_filter, parameter):
+def count_product(url):
     """
     Getting product count from api
     :param url: Page url
-    :param url_filter: Page path access
-    :param parameter: Page filter
     :return: product_count
     """
-    print(f"Récupération du nombre de produits depuis {url}/{url_filter}/{parameter}.json...")
-    req = requests.get(f"{url}/{url_filter}/{parameter}.json")
+    short_url, url_filter, parameter = url[0], url[1], url[2]
+    print("\n")
+    print(f"Récupération du nombre de produits depuis {short_url}/{url_filter}/{parameter}.json...")
+    req = requests.get(f"{short_url}/{url_filter}/{parameter}.json")
     json_response = req.json()
     return json_response["count"]
 
@@ -99,7 +109,7 @@ def calculate_parsing_loops(product_count):
     :return:
     """
     products_in_page = 20
-    amount_last_number = 0
+    amount_last_page_products = 0
 
     # if products < 20 : products in page = number of products
     if product_count < products_in_page:
@@ -116,56 +126,67 @@ def calculate_parsing_loops(product_count):
 
         # Get the last items
         # ( example : 1 in the last page)
-        amount_last_number = listed_amount[-1]
+        amount_last_page_products = listed_amount[-1]
 
         # Last number is not 0 : we need to get the last products
-        if amount_last_number != 0:
+        if amount_last_page_products != 0:
             if len(listed_amount) > 1:
                 if listed_amount[-2] % 2 != 0:
-                    amount_last_number += 10
+                    amount_last_page_products += 10
 
-    return products_in_page, page_range, amount_last_number
+    return products_in_page, page_range, amount_last_page_products
 
 
-def get_products(url, url_filter, parameter, product_count):
+def get_products(url, product_count):
     """
     Get products from page
     :param url: Page url
-    :param url_filter: Page path access
-    :param parameter: Page filter
     :param product_count: Number of products
     """
     create_tables()
-    products_in_page, page_range, amount_last_number = calculate_parsing_loops(product_count)
-
+    products_in_page, page_range, amount_last_page_products = calculate_parsing_loops(product_count)
+    page = 0
+    short_url, url_filter, parameter = url[0], url[1], url[2]
     for page in range(page_range):
-
-        json_response = request_page(url, url_filter, parameter, page)
+        json_response = request_page(url, page)
         product_dictionary = json_response["products"]
         for product in range(products_in_page):
             get_product_values(product, parameter, product_dictionary)
             product += 1
-        page += 1
-
-        if amount_last_number != 0:
-            request_page(url, url_filter, parameter, page)
-            product_dictionary = json_response["products"]
-            for product in range(amount_last_number):
-                get_product_values(product, parameter, product_dictionary)
-                product += 1
+    get_last_products(amount_last_page_products, url, page)
+    admin_entry()
 
 
-def request_page(url, url_filter, parameter, page):
+def get_last_products(amount_last_page_products, url, page):
+    """
+    Get the last page products
+    :param amount_last_page_products: amount of last page products
+    :param url: URL page
+    :param page: Current page
+    :return: 1
+    """
+    short_url, url_filter, parameter = url[0], url[1], url[2]
+    if amount_last_page_products != 0:
+        print(f"Récupération des {amount_last_page_products} derniers produits "
+              f"depuis {short_url}/{url_filter}/{parameter}/{page+1}.json...")
+        json_response = request_page(url, page+1)
+        product_dictionary = json_response["products"]
+        for product in range(amount_last_page_products):
+            get_product_values(product, parameter, product_dictionary)
+            product += 1
+
+
+def request_page(url, page):
     """
     :param url: Page url
-    :param url_filter: Page path access
-    :param parameter: Page filter
     :param page: Current page
     :return: Page in json format
     """
     # Get the page
-    print(f"Récupération des produits depuis {url}/{url_filter}/{parameter}/{page+1}.json ...")
-    req = requests.get(f"{url}/{url_filter}/{parameter}/{page+1}.json")
+    print("\n")
+    short_url, url_filter, parameter = url[0], url[1], url[2]
+    print(f"Récupération des produits depuis {short_url}/{url_filter}/{parameter}/{page+1}.json ...")
+    req = requests.get(f"{short_url}/{url_filter}/{parameter}/{page+1}.json")
     json_response = req.json()
     return json_response
 
@@ -202,20 +223,23 @@ def create_tables():
     """
     Create tables if not exists
     """
-    connection, cursor = Connection.connect_to_database()
-    cursor.execute("""CREATE TABLE IF NOT EXISTS categories(
-                id_category INTEGER PRIMARY KEY AUTO_INCREMENT UNIQUE, name TEXT) """)
+    with warnings.catch_warnings():
+        warnings.simplefilter('ignore')
+        connection = Connection.connect_to_database()
+        cursor = connection.cursor()
+        cursor.execute("""CREATE TABLE IF NOT EXISTS categories(
+                    id_category INTEGER PRIMARY KEY AUTO_INCREMENT UNIQUE, name TEXT) """)
 
-    cursor.execute("""CREATE TABLE IF NOT EXISTS products(
-                id INTEGER PRIMARY KEY AUTO_INCREMENT UNIQUE, 
-                name TEXT,  
-                grade VARCHAR(50), 
-                url TEXT,
-                id_category INTEGER(1),
-                FOREIGN KEY fk_category(id_category)
-                REFERENCES
-                categories(id_category)
-                ON UPDATE CASCADE
-                ON DELETE RESTRICT) """)
-    cursor.close()
-    connection.close()
+        cursor.execute("""CREATE TABLE IF NOT EXISTS products(
+                    id INTEGER PRIMARY KEY AUTO_INCREMENT UNIQUE, 
+                    name TEXT,  
+                    grade VARCHAR(50), 
+                    url TEXT,
+                    id_category INTEGER(1),
+                    FOREIGN KEY fk_category(id_category)
+                    REFERENCES
+                    categories(id_category)
+                    ON UPDATE CASCADE
+                    ON DELETE RESTRICT) """)
+        cursor.close()
+        connection.close()
