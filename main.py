@@ -3,9 +3,9 @@ A program to use database data from the API of Openfoodfact
 """
 # !/usr/bin/python
 # -*- coding: utf-8 -*-
-from admin_interface import admin_entry
-from client_interface import substitute_product_from_category, list_substitutes
-from client_interface import make_a_choice as client_choice
+from admin_interface import admin_interface
+from client_interface import choose_category, list_substitutes
+from client_interface import client_interface
 
 
 def make_a_choice():
@@ -34,7 +34,7 @@ _MM_         YMMM9MM__MM_          _MYMMMM9   YMMMM9   YMMM9MM__MM_    _MM_     
 
     if choice == "1":
         print("Nous allons vous proposer une catégorie de produits. Vous pourrez alors trouver une alternative !")
-        substitute_product_from_category()
+        choose_category()
     elif choice == "2":
         print("Dans un très bref instant vous accéderez à la section dédiée à vos enregistrements de produits...")
         list_substitutes()
@@ -43,11 +43,11 @@ _MM_         YMMM9MM__MM_          _MYMMMM9   YMMMM9   YMMM9MM__MM_    _MM_     
         print("Pour procéder à cette option nous vous demandons un mot de passe administrateur.")
         password = input("Entrez le mot de passe s'il vous plaît...\t")
         if password == "******":
-            admin_entry()
+            admin_interface()
         else:
             print("Vous ne possédez pas le mot de passe administrateur...")
             print("Le programme va se fermer.")
-            client_choice("quit")
+            client_interface("quit")
     else:
         print("Essayez encore...")
         make_a_choice()

@@ -4,7 +4,6 @@ The class to handle products when feeding database
 # !/usr/bin/python
 # -*- coding: utf-8 -*-
 from connection import Connection
-from category import Category
 
 
 class Product:
@@ -19,7 +18,19 @@ class Product:
         self.url = product_values[3]
         print(product_values)
 
+    def save(self):
+        """
+        Save the product in database
+        """
+        category_existing = self.check_existing_category(self.category)
+        self.save_category(self.category, category_existing)
+        self.save_product()
+
     def get_id_category(self):
+        """
+        Get id of the category
+        :return:
+        """
         # Get the id category in table categories where name correspond
         connection = Connection.connect_to_database()
         cursor = connection.cursor()
@@ -31,12 +42,38 @@ class Product:
         connection.close()
         return fetch_category_id
 
-    def save(self):
+    @staticmethod
+    def check_existing_category(category):
         """
-        Save the product in database
+        Check if the category already exists
+        :param category: The product category
+        :return: category_existing
         """
-        Category.save_category(self.category)
-        self.save_product()
+        # Check if the category is already in table
+        connection = Connection.connect_to_database()
+        cursor = connection.cursor()
+        cursor.execute(f"SELECT COUNT(*) AS category_counter FROM openfoodfact.categories "
+                       f"WHERE Name = '{category}'")
+        category_existing = cursor.fetchone()
+        cursor.close()
+        connection.close()
+        return category_existing
+
+    @staticmethod
+    def save_category(category, category_existing):
+        """
+        Save the category if not exists
+        :param category: The category
+        :param category_existing: The return about category existence
+        :return:
+        """
+        if category_existing[0] == 0:
+            connection = Connection.connect_to_database()
+            cursor = connection.cursor()
+            cursor.execute(f"INSERT INTO openfoodfact.categories(name) VALUES ('{category}')")
+            connection.commit()
+            cursor.close()
+            connection.close()
 
     def save_product(self):
         """
@@ -108,6 +145,7 @@ class Product:
         """
         Remove redundant products
         :param redundant_ids:
+
         :param redundant_id:
         """
         connection = Connection.connect_to_database()
