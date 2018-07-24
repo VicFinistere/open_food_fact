@@ -179,8 +179,7 @@ def changing_product_page(product_number, products_count, category_name, categor
         else:
             get_page_products(products_count, category_name, category_id)
 
-    if navigation:
-        return navigation, product_number
+    return navigation, product_number
 
 
 def get_products(navigation, product_number, category_name, category_id):
@@ -403,10 +402,6 @@ def page_substitutions(substitutes):
                 show_substitute(substitutes, substitution_number)
 
         manage_substitution_table()
-        if len(substitutes) == 0:
-            print("Il n'y a plus de produits dans la liste ...")
-
-        client_interface("quit")
 
 
 def list_current_substitute(substituted, substitute):
