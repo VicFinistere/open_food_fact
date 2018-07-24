@@ -57,8 +57,12 @@ def choose_category():
     print("\n")
     input_category = input("Entrez un numéro de catégorie\t")
     try:
+        # Input string converting to an integer
         category_number = int(input_category)
         if 0 < category_number < 10:
+
+            # Using 0 we have to reduce by 1
+            category_number -= 1
             parameter = categories[category_number][0]
             category_id = select_category_id(parameter)
             products_count = count_products_from_category(category_id)
@@ -133,41 +137,62 @@ def get_page_products(products_count, category_name, category_id):
     """
     # There will be 10 products by page
     product_number = -10
-    print(f"Vous avez sélectionné la catégorie {category_name} ")
+    print(f"\nVous avez sélectionné la catégorie {category_name} ")
     for page in range(products_count // 10):
-        choice = ''
-        if product_number >= 10:
-            print("\n")
-            choice = input("Touche 'n' : Touche 'n' : produits suivants  / Touche 'p': produits précédents\t")
-        if product_number == -10:
-            print("\n")
-            choice = input("Touche 'n' : Afficher les produits\t")
-        if choice in ('n', 'N'):
-            product_number += 10
-        elif choice in ('p', 'P') and product_number >= 10:
-            product_number -= 10
-        else:
-            print("\n")
-            print("Ce n'est pas une option !...")
-            choice = input("Voulez-vous revenir au menu principal ?(Y/N)\t")
-            if choice in ('y', 'Y'):
-                client_interface("start")
-            else:
-                get_page_products(products_count, category_name, category_id)
-        get_products(product_number, category_name, category_id)
+        navigation, product_number = changing_product_page(product_number, products_count, category_name, category_id)
+        get_products(navigation, product_number, category_name, category_id)
         ask_to_substitute(product_number, category_id)
         page += 1
     client_interface("quit")
 
 
-def get_products(product_number, category_name, category_id):
+def changing_product_page(product_number, products_count, category_name, category_id):
+    """
+    Choose to move forward or backward in list of selected category's products
+    :param product_number: Current product number
+    :param products_count: Amount of product
+    :param category_name: Name of the category
+    :param category_id: Id of the category
+    :return:
+    """
+    next_or_previous = 'Navigation'
+    if product_number >= 10:
+        print("\n")
+        next_or_previous = input(" Touche 's' : suite  / Touche 'p': précédent / 'menu' : revenir au menu \t")
+
+    navigation = False
+    if product_number < 10:
+        product_number += 10
+        navigation = "en suivant"
+    elif next_or_previous in ('s', 'S'):
+        product_number += 10
+        navigation = "en suivant"
+    elif next_or_previous in ('p', 'P'):
+        product_number -= 10
+        navigation = "de la précédente liste"
+    else:
+        print("\n")
+        print("Attention ! Vous ne naviguez plus dans la liste !...")
+        choice = input("ok : Pour revenir au menu principal / retour : Parcourir la liste de la catégorie\t")
+        if choice in ('ok', 'OK', 'Ok', 'oK'):
+            client_interface("start")
+        else:
+            get_page_products(products_count, category_name, category_id)
+
+    if navigation:
+        return navigation, product_number
+
+
+def get_products(navigation, product_number, category_name, category_id):
     """
     Get products in a list of 10 results
+    :param navigation: Feedback for user in navigation
     :param product_number: The current first product in list
     :param category_name: Name of the category
     :param category_id: Id of the category
     :param category_id: The category of products to parse
     """
+    print(f"\n Et voila les 9 {category_name} {navigation} !\n")
     for _ in range(10):
         parse_product(product_number, category_name, category_id)
         product_number += 1
@@ -192,7 +217,7 @@ def parse_product(product_number, category_name, category_id):
         name = f"{category_name}"
     else:
         name = products[0][0]
-    print(product_number, ":", name)
+    print("\t", product_number, ":", name)
 
 
 def ask_to_substitute(first_product_in_list, category_id):
@@ -202,16 +227,20 @@ def ask_to_substitute(first_product_in_list, category_id):
     :param category_id: Current category id
     """
     print("\n")
-    choice = input("Voulez vous un substitut à l'un de ces produits ?(Y/N)")
+    choice = input("Voulez vous un substitut à l'un de ces produits ?(Y/N)\t")
     if choice in ('y', 'Y'):
-        product_number_input = input("Inscrire le numéro...\t")
+        product_number_input = input("Quel numéro de produit avez-vous choisi ?\t")
         product_number = int(product_number_input)
         if first_product_in_list <= product_number <= first_product_in_list + 9:
+            print("Merci !")
             selected_product = show_selected_product(product_number, category_id)
             comment_about_grade(selected_product[2])
             find_substitutes(selected_product)
         else:
             print(f"Vous devez saisir une valeur entre {first_product_in_list} et {first_product_in_list+10} ")
+    if choice not in ('n', 'N'):
+        print("\n\t( Y = Oui / N = Non)\n")
+        ask_to_substitute(first_product_in_list, category_id)
 
 
 def show_selected_product(product_number, category_id):
@@ -223,8 +252,6 @@ def show_selected_product(product_number, category_id):
     """
     connection = Connection.connect_to_database()
     cursor = connection.cursor()
-    print("\n")
-    print(f"Sélection du numéro : {product_number}")
     get_product_req = f"SELECT * FROM openfoodfact.products " \
                       f"WHERE id_category = {category_id} LIMIT {product_number}, 1"
     cursor.execute(get_product_req)
@@ -232,9 +259,10 @@ def show_selected_product(product_number, category_id):
     cursor.close()
     connection.close()
     print("\n")
-    print("name : ", selected_product[1])
-    print("nutrition score : ", selected_product[2])
-    print("url : ", selected_product[3])
+    print(f"Numéro : {product_number}")
+    print("Nom : ", selected_product[1])
+    print("Grade : ", selected_product[2])
+    print("URL : ", selected_product[3])
     return selected_product
 
 
@@ -280,7 +308,8 @@ def find_substitutes(selected_product):
         cursor.close()
         substitutes = cursor.fetchone()
         if selected_product[4] == substitutes[4]:
-            print("Il n'y a pas de meilleur nutrition score pour cette catégorie de produit !")
+            print("Il s'agit du meilleur grade de la catégorie !")
+            print("Nous pouvons seulement vous proposer un autre produit aussi bon ...")
 
     print("\n")
     print("Substitut : ", substitutes[1])
@@ -288,8 +317,9 @@ def find_substitutes(selected_product):
     print("URL : ", substitutes[3])
 
     print("\n")
-    choice = input("Voulez-vous sauvegarder ce substitut ?(Y/N)\t")
+    choice = input("Voulez-vous sauvegarder ce produit ?(Y/N)\t")
     if choice in ('y', 'Y'):
+        print("Le produit a été sauvegardé !\n")
         save_substitution(selected_product, substitutes)
 
 
@@ -451,7 +481,7 @@ def manage_substitution_table():
     truncate_req = input("Voulez vous vider cette liste ? (Y/N)\t")
     if truncate_req in ('y', 'Y'):
         truncate_substitution_table()
-        print("La liste de vos substituts alimentaires effacée !")
+        print("La liste de vos substituts alimentaires vient d'être effacée !")
         client_interface("start")
     else:
         print("Vos substituts alimentaires sont sauvegardées !")
