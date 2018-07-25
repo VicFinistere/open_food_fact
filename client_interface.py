@@ -244,7 +244,7 @@ def ask_to_substitute(first_product_in_list, category_id):
     if choice not in ('n', 'N'):
         print("\n")
         print("Il s'agit d'abord d'indiquer si vous souhaitez une alternative...")
-        print("\n\t( Y = Oui / N = Non)\n")
+        print("\n\t( Y = Oui / N = Non)")
         ask_to_substitute(first_product_in_list, category_id)
 
 
