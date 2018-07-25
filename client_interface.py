@@ -49,7 +49,7 @@ def choose_category():
     """
     print("\n")
     print("Dans quelle catégorie voulez-vous substituer l'aliment ?")
-    categories = get_categories()
+    categories = get_categories_name()
     print("\n")
     for number, _ in enumerate(categories):
         print(f"\t * {number+1} : {categories[number][0]}")
@@ -75,7 +75,7 @@ def choose_category():
         choose_category()
 
 
-def get_categories():
+def get_categories_name():
     """
     Getting the categories from database
     :return: categories
@@ -227,24 +227,26 @@ def ask_to_substitute(first_product_in_list, category_id):
     """
     print("\n")
     choice = input("Voulez vous un substitut à l'un de ces produits ?(Y/N)\t")
+    if choice == 'y' or choice == 'Y':
+        substitution(first_product_in_list, category_id)
 
-    if choice in ('y', 'Y'):
-        product_number_input = input("Quel numéro de produit avez-vous choisi ?\t")
-        product_number = int(product_number_input)
-        if first_product_in_list <= product_number <= first_product_in_list + 9:
-            print("Merci !")
-            selected_product = show_selected_product(product_number, category_id)
-            comment_about_grade(selected_product[2])
-            find_substitutes(selected_product)
-        else:
-            print(f"Vous devez saisir une valeur entre {first_product_in_list} et {first_product_in_list+9} ")
-            choice = ""
-            ask_to_substitute(first_product_in_list, category_id)
-
-    if choice not in ('n', 'N'):
+    elif choice != 'n' and choice != 'N':
         print("\n")
         print("Il s'agit d'abord d'indiquer si vous souhaitez une alternative...")
         print("\n\t( Y = Oui / N = Non)")
+        ask_to_substitute(first_product_in_list, category_id)
+
+
+def substitution(first_product_in_list, category_id):
+    product_number_input = input("Quel numéro de produit avez-vous choisi ?\t")
+    product_number = int(product_number_input)
+    if first_product_in_list <= product_number <= first_product_in_list + 9:
+        print("Merci !")
+        selected_product = show_selected_product(product_number, category_id)
+        comment_about_grade(selected_product[2])
+        find_substitutes(selected_product)
+    else:
+        print(f"Vous devez saisir une valeur entre {first_product_in_list} et {first_product_in_list+9} ")
         ask_to_substitute(first_product_in_list, category_id)
 
 
@@ -382,10 +384,10 @@ def list_substitutes():
     substitutes = cursor.fetchall()
     cursor.close()
     connection.close()
-    page_substitutions(substitutes)
+    show_substitutions_rows(substitutes)
 
 
-def page_substitutions(substitutes):
+def show_substitutions_rows(substitutes):
     """
     Show substitution table rows
     :param substitutes: All results from substitution table
