@@ -227,6 +227,7 @@ def ask_to_substitute(first_product_in_list, category_id):
     """
     print("\n")
     choice = input("Voulez vous un substitut à l'un de ces produits ?(Y/N)\t")
+
     if choice in ('y', 'Y'):
         product_number_input = input("Quel numéro de produit avez-vous choisi ?\t")
         product_number = int(product_number_input)
@@ -236,8 +237,12 @@ def ask_to_substitute(first_product_in_list, category_id):
             comment_about_grade(selected_product[2])
             find_substitutes(selected_product)
         else:
-            print(f"Vous devez saisir une valeur entre {first_product_in_list} et {first_product_in_list+10} ")
+            print(f"Vous devez saisir une valeur entre {first_product_in_list} et {first_product_in_list+9} ")
+            choice = ""
+            ask_to_substitute(first_product_in_list, category_id)
+
     if choice not in ('n', 'N'):
+        print("Il s'agit d'abord d'indiquer si vous souhaitez une alternative...")
         print("\n\t( Y = Oui / N = Non)\n")
         ask_to_substitute(first_product_in_list, category_id)
 
