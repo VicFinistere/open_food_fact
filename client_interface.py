@@ -440,11 +440,11 @@ def list_current_substitute(substituted, substitute):
     :param substitute:
     """
     print("\n")
-    print(f"Vous avez trouvé un substitut pour le {substituted[0][1]}")
-    print(substituted[0][1], substituted[0][2], substituted[0][3])
+    print(f"Vous avez trouvé un substitut pour : {substituted[0][1]} ( Grade : {substituted[0][2].upper()})")
+    print(substituted[0][3])
     print("\n")
-    print(f" Il s'agit de {substitute[0][1]}")
-    print(substitute[0][1], substitute[0][2], substitute[0][3])
+    print(f" Il s'agit de : {substitute[0][1]} ( Grade : {substitute[0][2].upper()})")
+    print(substitute[0][3])
 
 
 def get_substituted_product(substitutes, substitution_row):
