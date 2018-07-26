@@ -11,8 +11,10 @@ def client_interface(choice="start"):
     """
     Actions user can perform
     """
-    print("\n")
     if choice == "start":
+        print("\n")
+        print("Menu principal")
+        print("\n")
         print("Voulez-vous 1 = substituer un aliment  ou 2 = retrouver vos aliments substitués ? ")
         print("(Pour quitter inscrire 'quit' )")
         choice = input("Inscrire votre choix\t")
@@ -373,7 +375,7 @@ def inserting_products_id(product, substitute):
     cursor.close()
     connection.close()
     print(
-        "Vous pouvez retrouver vos produits substitués en choisissant l'option dédiée au démarrage de l'application !")
+        "Vous pouvez retrouver vos produits substitués en choisissant l'option dédiée dans le menu principal !")
     client_interface("start")
 
 
@@ -402,8 +404,7 @@ def show_substitutions_rows(substitutes):
         print("\n")
         print("\n")
         print("Vous n'avez pas de sauvegardes de produits substitués !")
-        print("\n")
-        print("Retour à l'interface utilisateur...")
+        print("Retour au menu principal !")
         client_interface("start")
     else:
         print("\n")
@@ -494,6 +495,7 @@ def manage_substitution_table():
     if truncate_req in ('y', 'Y'):
         truncate_substitution_table()
         print("La liste de vos substituts alimentaires vient d'être effacée !")
+        print("Retour au menu principal !")
         client_interface("start")
     else:
         print("Vos substituts alimentaires sont sauvegardées !")
