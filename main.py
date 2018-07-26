@@ -36,7 +36,7 @@ _MM_         YMMM9MM__MM_          _MYMMMM9   YMMMM9   YMMM9MM__MM_    _MM_     
         print("Nous allons vous proposer une catégorie de produits. Vous pourrez alors trouver une alternative !")
         choose_category()
     elif choice == "2":
-        print("Dans un très bref instant vous accéderez à la section dédiée à vos enregistrements de produits...")
+        print("Accès à la section dédiée à vos enregistrements de produits...")
         list_substitutes()
     elif choice == "admin":
         print("\n")
