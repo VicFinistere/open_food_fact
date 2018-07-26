@@ -43,6 +43,7 @@ def client_interface(choice="start"):
         exit(0)
 
 
+# 1st Option for client interface
 def choose_category():
     """
     Find a category for product to substitute
@@ -71,8 +72,11 @@ def choose_category():
             print("Entrez un numéro entre 1 et 9 !")
             choose_category()
     except ValueError:
-        print("Entrez un chiffre !")
-        choose_category()
+        if input_category == "quit":
+            client_interface("quit")
+        else:
+            print("Entrez un chiffre !")
+            choose_category()
 
 
 def get_categories_name():
@@ -373,6 +377,7 @@ def inserting_products_id(product, substitute):
     client_interface("start")
 
 
+# 2nd Option for client interface
 def list_substitutes():
     """
     List substitutes from database substitution table
@@ -401,15 +406,31 @@ def show_substitutions_rows(substitutes):
         print("Retour à l'interface utilisateur...")
         client_interface("start")
     else:
+        print("\n")
+        print(f"Vous avez enregistré {len(substitutes)} paires de produits et alternatives associées.")
         for substitution_number, _ in enumerate(substitutes):
             if substitution_number > 0:
-                get_other_substitute = input(f"Afficher le produit #{(len(substitutes)-substitution_number)+1} ? (Y/N)")
+                get_other_substitute = input(f"\nAfficher l'alternative #{substitution_number+1} ? (Y/N)\t")
                 if get_other_substitute in ('y', 'Y'):
+                    print(f"Alternative #{substitution_number+1}")
                     show_substitute(substitutes, substitution_number)
             else:
+                print(f"Alternative #{substitution_number+1}")
                 show_substitute(substitutes, substitution_number)
 
         manage_substitution_table()
+
+
+def show_substitute(substitutes, substitution_number):
+    """
+    Show current substitution table row
+    :param substitutes:
+    :param substitution_number:
+    :return:
+    """
+    substituted = get_substituted_product(substitutes, substitution_number)
+    substitute = get_substitute_product(substitutes, substitution_number)
+    list_current_substitute(substituted, substitute)
 
 
 def list_current_substitute(substituted, substitute):
@@ -424,18 +445,6 @@ def list_current_substitute(substituted, substitute):
     print("\n")
     print(f" Il s'agit de {substitute[0][1]}")
     print(substitute[0][1], substitute[0][2], substitute[0][3])
-
-
-def show_substitute(substitutes, substitution_number):
-    """
-    Show current substitution table row
-    :param substitutes:
-    :param substitution_number:
-    :return:
-    """
-    substituted = get_substituted_product(substitutes, substitution_number)
-    substitute = get_substitute_product(substitutes, substitution_number)
-    list_current_substitute(substituted, substitute)
 
 
 def get_substituted_product(substitutes, substitution_row):
