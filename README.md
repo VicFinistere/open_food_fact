@@ -23,3 +23,6 @@ A simple program to use data stored from the API
 * If the user press another letter keyboard key the program tells "it is not an option" an the user can restart the app.  
 * When the user chooses to get the list of substitutes he has already save the applications shows it
 * The user is free to empty its list of substituted products
+
+## Trello Board
+https://trello.com/b/MekhFvWo/bdd-openfoodfact
