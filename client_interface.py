@@ -354,8 +354,14 @@ def create_table_substitution():
     cursor = connection.cursor()
     with warnings.catch_warnings():
         warnings.simplefilter('ignore')
-        cursor.execute("""CREATE TABLE IF NOT EXISTS substitution(
-        id_product INTEGER, id_substituted_product INTEGER) """)
+        cursor.execute("""CREATE TABLE IF NOT EXISTS `openfoodfact`.`substitution` (
+        `id_product` INT(11) NOT NULL, `id_substituted_product` INT(11) NOT NULL, 
+        PRIMARY KEY (`id_product`, `id_substituted_product`),
+        CONSTRAINT `id_product` FOREIGN KEY (`id_product`) 
+        REFERENCES `openfoodfact`.`products` (`id`),
+        CONSTRAINT `id_substituted_product` FOREIGN KEY (`id_substituted_product`)
+        REFERENCES `openfoodfact`.`products` (`id`) 
+        ON DELETE CASCADE ON UPDATE CASCADE)""")
     cursor.close()
     connection.close()
 
