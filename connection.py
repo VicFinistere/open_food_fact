@@ -19,7 +19,7 @@ class Connection:
         """
         connection = pymysql.connect(host="127.0.0.1",  # The Host
                                      user="root",  # username
-                                     passwd="P0rt1she@d",  # password
+                                     passwd="******",  # password
                                      db="openfoodfact",
                                      port=3306)  # name of the data base
         # print("Connexion")
